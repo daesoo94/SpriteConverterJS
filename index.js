@@ -7,26 +7,34 @@
                 1-5 : 저장한다.
 */
 
-// https://github.com/EyalAr/lwip 참조할 것.
-
 var fs = require('fs');
+var Jimp = require('jimp');
 
-class FileLoader {
+class SpriteLoader {
     constructor() {
         // TODO : path 수정 가능하게 만들기.
-        this.SPRITE_DIRECTORY_PATH = '/assets/before convert';
+        this.SPRITE_DIRECTORY_PATH = '/assets/sprites';
     }
 
     getSprites() {
-        var spriteNames = this.getSpriteNames();
-        var sprites = [];
+        return new Promise((resolve) => {
+            var spriteNames = this.getSpriteNames();
+            var sprites = [];
 
-        spriteNames.forEach((spriteName) => {
-            var readSprite = fs.readFileSync(__dirname + this.SPRITE_DIRECTORY_PATH + '/' + spriteName);
-            sprites.push(readSprite);
+            spriteNames.forEach((spriteName) => {
+                Jimp.read(__dirname + this.SPRITE_DIRECTORY_PATH + '/' + spriteName)
+                    .then(readSprite => {
+                        readSprite.id = spriteName;
+                        sprites.push(readSprite);
+                        if (sprites.length == spriteNames.length) {
+                            resolve(sprites);
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            });
         });
-
-        return sprites;
     }
 
     getSpriteNames() {
@@ -46,7 +54,7 @@ class FileLoader {
     }
 
     isImageFile(name) {
-        if (name.match(/(.*(.)png)|(.*(.)jpg)|(.*(.)jpeg)|(.*(.)bmp)|(.*(.)gif)/g)) {
+        if (name.match(/(.*(.)png)|(.*(.)jpg)|(.*(.)jpeg)|(.*(.)bmp)/g)) {
             return true;
         }
         return false;
@@ -54,12 +62,23 @@ class FileLoader {
 }
 
 class SpriteConverter {
+    converting(sprites) {
+        sprites.forEach((sprite) => {
+            var width = sprite.bitmap.width;
+            var height = sprite.bitmap.height;
+            var bestWidth = this.getBestFit(width);
+            var bestHeight = this.getBestFit(height);
 
+            new Jimp(bestWidth, bestHeight, 0x00000000)
+                .blit(sprite, 0, 0)
+                .writeAsync(__dirname + '/converted/' + sprite.id);
+        });
+    }
 
     getBestFit(base) {
         var bestFit = 1;
 
-        while (bsetFit < base) {
+        while (bestFit < base) {
             bestFit *= 2;
         }
 
@@ -68,11 +87,11 @@ class SpriteConverter {
 }
 
 
-function main() {
-    var fileLoader = new FileLoader();
-    var spritesBuffers = fileLoader.getSprites();
+async function main() {
+    var spriteLoader = new SpriteLoader();
+    var spriteConverter = new SpriteConverter();
 
-    console.log(spritesBuffers);
+    spriteConverter.converting(await spriteLoader.getSprites());
 }
 
 main();
