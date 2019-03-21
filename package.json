@@ -1,0 +1,19 @@
+{
+  "name": "converter",
+  "version": "1.0.0",
+  "description": "sprite converter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daesoo94/SpriteConverterJS.git"
+  },
+  "author": "DaeSoo-Sim",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daesoo94/SpriteConverterJS/issues"
+  },
+  "homepage": "https://github.com/daesoo94/SpriteConverterJS#readme"
+}
